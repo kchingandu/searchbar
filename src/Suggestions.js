@@ -1,9 +1,10 @@
-import React from 'react';
 import classNames from 'classnames';
+import React, { Component } from 'react';
 
-class Suggestions extends React.Component {
+class Suggestions extends Component {
     constructor(props) {
         super(props);
+
         this.state = {
             activeItem: -1
         };
@@ -17,12 +18,15 @@ class Suggestions extends React.Component {
 
     onTouchMove() {
         clearTimeout(this.timer);
+
         this.touchedMoved = true;
+
         this.setState({ activeItem: -1 });
     }
 
     onTouchEnd(suggestion) {
         if (!this.touchedMoved) {
+
             setTimeout(() => {
                 this.props.onSelection(suggestion);
             }, 220);
@@ -31,29 +35,29 @@ class Suggestions extends React.Component {
     }
 
     render() {
-        const { highlightedItem, searchTerm, suggestions } = this.props;
+        const { highlightedItem, onSelection, suggestions } = this.props;
+
         const { activeItem } = this.state;
+
         return (
-            <ul
-                className="search-bar-suggestions"
+            <ul className="search-bar-suggestions"
+
                 onMouseLeave={() => this.setState({ activeItem: -1 })}>
+
                 {suggestions.map((suggestion, index) =>
-                        <li
-                            className={classNames({
-                                highlighted: highlightedItem === index || activeItem === index
-                            })}
-                            key={index}
-                            onClick={() => this.props.onSelection(suggestion)}
-                            onMouseEnter={() => this.setState({ activeItem: index })}
-                            onMouseDown={(e) => e.preventDefault()}
-                            onTouchStart={() => this.onTouchStart(index)}
-                            onTouchMove={() => this.onTouchMove()}
-                            onTouchEnd={() => this.onTouchEnd(suggestion)}>
-            <span>
-              {searchTerm}
-                <strong>{suggestion.t.substr(searchTerm.length)}</strong>
-            </span>
-                        </li>
+
+                    <li key={index}
+                        onTouchMove={() => this.onTouchMove()}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onTouchStart={() => this.onTouchStart(index)}
+                        onTouchEnd={() => this.onTouchEnd(suggestion)}
+                        onClick={() => onSelection(suggestion)}
+                        onMouseEnter={() => this.setState({ activeItem: index })}
+                        className={classNames({
+                            highlighted: highlightedItem === index || activeItem === index
+                        })}>
+                        <strong>{suggestion.t}</strong>
+                    </li>
                 )}
             </ul>
         );
@@ -61,9 +65,9 @@ class Suggestions extends React.Component {
 }
 
 Suggestions.propTypes = {
+    onSelection: React.PropTypes.func,
     highlightedItem: React.PropTypes.number,
-    searchTerm: React.PropTypes.string.isRequired,
-    suggestions: React.PropTypes.array.isRequired
+    suggestions: React.PropTypes.array.isRequired,
 };
 
 export default Suggestions;

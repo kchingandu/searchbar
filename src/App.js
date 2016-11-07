@@ -1,41 +1,49 @@
-import React, { Component } from 'react';
-import SearchBar from './SearchBar'
 import './App.css';
+import SearchBar from './SearchBar'
+import { connect } from 'react-redux'
+import React from 'react';
 
-class App extends Component {
+const App = (props)=> {
 
-    constructor(props) {
-        super(props);
+    /*getData(term, resolve)
+     {
 
-        this.getData = this.getData.bind(this);
+     console.log(this.props);
 
-        this.state = { suggestions: [] };
+     const url = `http://suggest.search.sky.com/go-web?term=` + term;
+
+     fetch(url).then((response) => {
+
+     response.json().then((data) => {
+     resolve(data.terms)
+
+     });
+     });
+     }*/
+
+    return (
+        <div className="App">
+            <SearchBar onChange={props.onChange}
+                       suggestions={props.suggestions}/>
+        </div>
+    );
+};
+
+const mapStateToProps = state => {
+    return { suggestions: state.suggestions };
+};
+
+const mapDisptachToProps = (dispatch) => {
+    return {
+        onChange: (term)=> {
+            console.log('>> ::',term);
+
+            dispatch({
+                type: 'GET_SUGGESTIONS',
+                payload: term
+            })
+        }
     }
+};
 
-    getData(term, resolve) {
-
-        console.log(resolve);
-
-        const url = `http://jsonp.afeld.me/?url=http://suggest.search.sky.com/go-web?term=` + term;
-
-        fetch(url).then((response) => {
-
-            response.json().then((data) => {
-                console.log(data.terms);
-
-                resolve(data.terms)
-
-            });
-        });
-    }
-
-    render() {
-        return (
-            <div className="App">
-                <SearchBar onChange={this.getData} ></SearchBar>
-            </div>
-        );
-    }
-}
-
-export default App;
+export default connect(mapStateToProps, mapDisptachToProps)(App);

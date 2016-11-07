@@ -1,9 +1,16 @@
+import './index.css';
+import App from './App';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
-import './index.css';
+import { createStore } from 'redux'
+import { Provider } from 'react-redux'
+import suggestionsReducer from './suggestionsReducer';
+
+let store = createStore(suggestionsReducer);
 
 ReactDOM.render(
-  <App />,
-  document.getElementById('root')
+    <Provider store={store}>
+        <App />
+    </Provider>,
+    document.getElementById('root')
 );

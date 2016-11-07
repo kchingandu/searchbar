@@ -3,7 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
-    "react-scripts": "0.6.1"
+    "chai": "^3.5.0",
+    "enzyme": "^2.5.1",
+    "react-addons-test-utils": "^15.3.2",
+    "react-scripts": "0.6.1",
+    "sinon": "^1.17.6"
   },
   "dependencies": {
     "react": "^15.3.2",
