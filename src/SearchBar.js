@@ -14,7 +14,7 @@ class SearchBar extends React.Component {
     }
 
     createState() {
-        this.state = this.initialState = { inputValue: '', highlightedItem: -1 };
+        this.state = this.initialState = { inputValue: '', highlightedItemIndex: -1 };
     }
 
     bindFunctions() {
@@ -46,19 +46,19 @@ class SearchBar extends React.Component {
     }
 
     scroll(key) {
-        const { highlightedItem: item, suggestions = this.props.suggestions } = this.state;
+        const { highlightedItemIndex: itemIndex, suggestions = this.props.suggestions } = this.state;
 
-        const lastItem = suggestions.length - 1;
+        const lastItemIndex = suggestions.length - 1;
 
-        let nextItem;
+        let nextItemIndex;
 
         if (key === keyCodes.UP) {
-            nextItem = (item <= 0) ? lastItem : item - 1;
+            nextItemIndex = (itemIndex <= 0) ? lastItemIndex : itemIndex - 1;
         } else {
-            nextItem = (item === lastItem) ? 0 : item + 1;
+            nextItemIndex = (itemIndex === lastItemIndex) ? 0 : itemIndex + 1;
         }
 
-        this.setState({ highlightedItem: nextItem, inputValue: suggestions[nextItem].t || '' });
+        this.setState({ highlightedItemIndex: nextItemIndex, inputValue: suggestions[nextItemIndex].title || '' });
     }
 
     search() {
@@ -69,9 +69,9 @@ class SearchBar extends React.Component {
 
             this.refs.input.blur();
 
-            const { highlightedItem } = this.initialState;
+            const { highlightedItemIndex } = this.initialState;
 
-            this.setState({ highlightedItem });
+            this.setState({ highlightedItemIndex });
 
             if (this.props.onSearch) {
                 this.props.onSearch(value);
@@ -97,7 +97,7 @@ class SearchBar extends React.Component {
         const searchTerm = this.normalizeInputValue();
 
         this.props.onChange(searchTerm);
-        this.setState({ highlightedItem: -1 });
+        this.setState({ highlightedItemIndex: -1 });
     }
 
     normalizeInputValue() {
@@ -105,7 +105,7 @@ class SearchBar extends React.Component {
     }
 
     onSelection(suggestion) {
-        this.setState({ inputValue: suggestion.t }, () => this.search());
+        this.setState({ inputValue: suggestion.title }, () => this.search());
     }
 
     onSearch(e) {
@@ -114,6 +114,7 @@ class SearchBar extends React.Component {
     }
 
     render() {
+
         return (
             <div className="search-bar-wrapper">
 
@@ -134,7 +135,10 @@ class SearchBar extends React.Component {
                            value={this.state.inputValue}
                            placeholder={this.props.placeholder}
                            onFocus={() => this.setState({ isFocused: true })}
-                           onBlur={() => this.setState({ isFocused: false })}
+                           onBlur={() => {
+                               this.setState({ isFocused: false });
+                               console.log('Blurr');
+                           }}
                            onKeyDown={this.props.suggestions && this.onKeyDown}/>
 
                     { this.state.inputValue &&
@@ -148,11 +152,12 @@ class SearchBar extends React.Component {
                            className="icon search-bar-submit"/>
                 </div>
 
-                { this.state.isFocused && this.state.inputValue && this.props.suggestions.length > 0 &&
+                {   this.state.inputValue && this.props.suggestions.length > 0 &&
 
-                <Suggestions suggestions={this.props.suggestions}
-                             onSelection={this.onSelection}
-                             highlightedItem={this.state.highlightedItem}/>
+                <Suggestions onSelection={this.onSelection}
+                             searchTerm={this.state.inputValue}
+                             suggestions={this.props.suggestions}
+                             highlightedItemIndex={this.state.highlightedItemIndex}/>
                 }
             </div>
         );

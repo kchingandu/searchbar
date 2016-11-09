@@ -1,30 +1,22 @@
 import './App.css';
-import SearchBar from './SearchBar'
-import { connect } from 'react-redux'
 import React from 'react';
+import SearchBar from './SearchBar'
+import searchBot from './searchBot';
+import { connect } from 'react-redux'
 
 const App = (props)=> {
 
-    /*getData(term, resolve)
-     {
-
-     console.log(this.props);
-
-     const url = `http://suggest.search.sky.com/go-web?term=` + term;
-
-     fetch(url).then((response) => {
-
-     response.json().then((data) => {
-     resolve(data.terms)
-
-     });
-     });
-     }*/
+    function getData(term) {
+        searchBot.getSuggestions(term).then((result) => {
+            props.onChange(result)
+        })
+    }
 
     return (
         <div className="App">
-            <SearchBar onChange={props.onChange}
-                       suggestions={props.suggestions}/>
+            <SearchBar onChange={getData}
+                       suggestions={props.suggestions}
+                       placeholder="Search for TV shows, movies, actors or events..."/>
         </div>
     );
 };
@@ -36,8 +28,6 @@ const mapStateToProps = state => {
 const mapDisptachToProps = (dispatch) => {
     return {
         onChange: (term)=> {
-            console.log('>> ::',term);
-
             dispatch({
                 type: 'GET_SUGGESTIONS',
                 payload: term

@@ -8,34 +8,118 @@ describe('SearchBar', () => {
     let searchBar;
     let setTimeoutMock;
     let searchBarInput;
-    const props = { suggestions: [], onChange: sinon.stub(), delay: 0 };
+    const SEARCH_TERM = 'search term';
+    const SUGGESTION_TITLE = 'title 1';
+    const props = {
+        onChange: sinon.stub(),
+        onSearch: sinon.stub(),
+        suggestions: [{ t: 'title 1' }, { t: 'title 2' }],
+    };
 
-    it('should call the change handler with the users input (search term)', () => {
-        const SEARCH_TERM = 'search term';
+    describe('Search bar input', ()=> {
 
-        searchBarInput.simulate('change', { target: { value: SEARCH_TERM } });
+        it('should call the change handler with the users input (search term)', () => {
+            searchBarInput.simulate('change', { target: { value: SEARCH_TERM } });
 
-        setTimeoutMock.tick(0);
+            setTimeoutMock.tick(220);
 
-        assert.isTrue(props.onChange.calledWith(SEARCH_TERM));
+            assert.isTrue(props.onChange.calledWith(SEARCH_TERM));
+        });
+
+        it('should call blur when the escape key is pressed', () => {
+            searchBarInput.simulate('focus', searchBarInput);
+
+            const blur = searchBar.instance().refs.input.blur = sinon.stub();
+
+            searchBarInput.simulate('keydown', { keyCode: 27 });
+
+            assert.isTrue(blur.called);
+        });
+
+        it('should call the search callback when the enter key is', () => {
+            searchBar.setState({ inputValue: SEARCH_TERM });
+
+            searchBarInput.simulate('keydown', { keyCode: 13 });
+
+            assert.isTrue(props.onSearch.calledWith(SEARCH_TERM));
+        });
     });
 
-    it('should call the change handler with the users input (search term)', () => {
-        const w = mount(<SearchBar {...props}/>);
-        //console.log(w.find('.search-bar-input'));
-        // w.find('.search-bar-input').simulate('blur');
-        // console.log(w.state('isFocused'));
-        // w.find('.search-bar-input').simulate('focus');
-        // console.log(w.state('isFocused'));
+    describe('Suggestions section', () => {
+
+        it('should display the suggestions section', () => {
+            assert.include(searchBar.html(), SUGGESTION_TITLE);
+        });
+
+        it('should not display the suggestions section when the text input looses focus ', () => {
+            searchBar.setState({ isFocused: false, inputValue: true });
+
+            assert.notInclude(searchBar.html(), SUGGESTION_TITLE);
+        });
+
+        it('should not display the suggestions section when the input value is falsey ', () => {
+            searchBar.setState({ isFocused: true, inputValue: false });
+
+            assert.notInclude(searchBar.html(), SUGGESTION_TITLE);
+        });
+
+        it('should not display the suggestions section when the suggestions array is empty', () => {
+            searchBar.setProps({ suggestions: [] });
+
+            assert.notInclude(searchBar.html(), SUGGESTION_TITLE);
+        });
+
+        it('should set the highlight index of the next available item in the suggestions array', () => {
+            searchBar.setProps({ suggestions: [{ t: 'title 1' }, { t: 'title 2' }] });
+
+            searchBarInput.simulate('keydown', { keyCode: 40 });
+
+            assertItemIsAtFirstSuggestion();
+        });
+
+        it('should set the highlight back to the first element index after reaching the end of the list' +
+            ' (continuously press the down key)', () => {
+            searchBar.setProps({ suggestions: [{ t: 'title 1' }, { t: 'title 2' }] });
+
+            searchBarInput.simulate('keydown', { keyCode: 40 });
+            searchBarInput.simulate('keydown', { keyCode: 40 });
+            searchBarInput.simulate('keydown', { keyCode: 40 });
+
+            assertItemIsAtFirstSuggestion();
+        });
+
+        it('should set the highlight back to the previous index element', () => {
+            searchBar.setProps({ suggestions: [{ t: 'title 1' }, { t: 'title 2' }] });
+
+            searchBarInput.simulate('keydown', { keyCode: 40 });
+            searchBarInput.simulate('keydown', { keyCode: 40 });
+            searchBarInput.simulate('keydown', { keyCode: 38 });
+
+            assertItemIsAtFirstSuggestion();
+        });
+
+        function assertItemIsAtFirstSuggestion() {
+
+            assert.equal(searchBar.state('inputValue'), 'title 1');
+            assert.equal(searchBar.state('highlightedItemIndex'), 0);
+
+            assert.isTrue(searchBar.find('.search-bar-suggestions').childAt(0).hasClass('highlighted'));
+            assert.isFalse(searchBar.find('.search-bar-suggestions').childAt(1).hasClass('highlighted'));
+        }
+
+        beforeEach(() => {
+            searchBar.setState({ isFocused: true, inputValue: true });
+        })
     });
 
     beforeEach(() => {
-        searchBar = shallow(<SearchBar {...props}/>);
-        searchBarInput = searchBar.find('.search-bar-input');
         setTimeoutMock = sinon.useFakeTimers();
+        searchBar = mount(<SearchBar {...props}/>);
+        searchBarInput = searchBar.find('.search-bar-input');
     });
 
     afterEach(() => {
         setTimeoutMock.restore();
     });
+
 });

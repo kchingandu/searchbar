@@ -33,15 +33,59 @@ class Suggestions extends Component {
         }
         this.touchedMoved = false;
     }
+    componentDidUpdate(){
+
+
+    }
+    formatTitle(searchTerm, suggestion) {
+
+        let title = suggestion.title;
+
+        let result = title;
+
+        let modifiedCaseSearchTerm = upperCaseFirstLetter(searchTerm);
+
+        let positionOfModifiedCaseSearchTerm = title.search(modifiedCaseSearchTerm);
+
+        if (positionOfModifiedCaseSearchTerm === -1) {
+            modifiedCaseSearchTerm = searchTerm.toLowerCase();
+            positionOfModifiedCaseSearchTerm = title.search(modifiedCaseSearchTerm);
+        }
+
+        if (positionOfModifiedCaseSearchTerm === -1) {
+            modifiedCaseSearchTerm = searchTerm;
+            positionOfModifiedCaseSearchTerm = title.search(modifiedCaseSearchTerm);
+        }
+
+        if (positionOfModifiedCaseSearchTerm !== -1) {
+            result = [
+                title.substr(0, positionOfModifiedCaseSearchTerm),
+                <span className="strong" key={searchTerm}>{modifiedCaseSearchTerm}</span>,
+                title.substr(positionOfModifiedCaseSearchTerm + searchTerm.length, title.length)
+            ]
+        }
+
+        function upperCaseFirstLetter(text) {
+            return text
+                .toLowerCase()
+                .split(' ')
+                .map((word)=> {
+                    return word[0].toUpperCase() + word.substr(1);
+                })
+                .join(' ');
+        }
+
+        return result;
+    }
 
     render() {
-        const { highlightedItem, onSelection, suggestions } = this.props;
+        const { highlightedItemIndex, onSelection, suggestions, searchTerm } = this.props;
 
         const { activeItem } = this.state;
 
         return (
             <ul className="search-bar-suggestions"
-
+                ref="list"
                 onMouseLeave={() => this.setState({ activeItem: -1 })}>
 
                 {suggestions.map((suggestion, index) =>
@@ -54,9 +98,9 @@ class Suggestions extends Component {
                         onClick={() => onSelection(suggestion)}
                         onMouseEnter={() => this.setState({ activeItem: index })}
                         className={classNames({
-                            highlighted: highlightedItem === index || activeItem === index
+                            highlighted: highlightedItemIndex === index || activeItem === index
                         })}>
-                        <strong>{suggestion.t}</strong>
+                        { this.formatTitle(searchTerm, suggestion) }
                     </li>
                 )}
             </ul>
@@ -66,7 +110,7 @@ class Suggestions extends Component {
 
 Suggestions.propTypes = {
     onSelection: React.PropTypes.func,
-    highlightedItem: React.PropTypes.number,
+    highlightedItemIndex: React.PropTypes.number,
     suggestions: React.PropTypes.array.isRequired,
 };
 
