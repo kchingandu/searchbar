@@ -86,7 +86,11 @@ input {
     border-color: #ccc;
 }
 
-.search-bar-suggestions {
+
+.search-bar-suggestions:focus {outline:0;}
+
+
+.search-bar-suggestions, .search-bar-no-results {
     border: 1px solid #ccc;
     border-bottom-left-radius: 2px;
     border-bottom-right-radius: 2px;
@@ -100,8 +104,13 @@ input {
     background: black;
     color: white;
     overflow-y: scroll;
-    max-height: 294px;
+    height: 294px;
 
+}
+.search-bar-no-results{
+    text-align: center;
+    vertical-align: middle;
+    line-height: 294px;
 }
 
 .search-bar-suggestions li {
@@ -116,7 +125,7 @@ input {
     border: none;
 }
 
-.search-bar-suggestions .highlighted {
+.search-bar-suggestions .highlighted, .rolledOver{
     background: #fff;
     color: black;
 }
@@ -136,5 +145,4 @@ input {
 
 .strong{
     font-weight: bold;
-    color:red;
 }

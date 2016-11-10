@@ -7,22 +7,25 @@ import { connect } from 'react-redux'
 const App = (props)=> {
 
     function getData(term) {
+
         searchBot.getSuggestions(term).then((result) => {
-            props.onChange(result)
+            props.onChange(result);
+            //console.log(result);
         })
     }
 
     return (
         <div className="App">
             <SearchBar onChange={getData}
-                       suggestions={props.suggestions}
+                       suggestions={props.suggestionsData.suggestions}
+                       enableNoSuggestionsPanel={props.suggestionsData.isApiResponse}
                        placeholder="Search for TV shows, movies, actors or events..."/>
         </div>
     );
 };
 
 const mapStateToProps = state => {
-    return { suggestions: state.suggestions };
+    return { suggestionsData: state.suggestionsData};
 };
 
 const mapDisptachToProps = (dispatch) => {

@@ -13,7 +13,7 @@ describe('SearchBar', () => {
     const props = {
         onChange: sinon.stub(),
         onSearch: sinon.stub(),
-        suggestions: [{ t: 'title 1' }, { t: 'title 2' }],
+        suggestions: [{ title: 'title 1' }, { title: 'title 2' }],
     };
 
     describe('Search bar input', ()=> {
@@ -70,7 +70,7 @@ describe('SearchBar', () => {
         });
 
         it('should set the highlight index of the next available item in the suggestions array', () => {
-            searchBar.setProps({ suggestions: [{ t: 'title 1' }, { t: 'title 2' }] });
+            searchBar.setProps({ suggestions: [{ title: 'title 1' }, { title: 'title 2' }] });
 
             searchBarInput.simulate('keydown', { keyCode: 40 });
 
@@ -79,7 +79,7 @@ describe('SearchBar', () => {
 
         it('should set the highlight back to the first element index after reaching the end of the list' +
             ' (continuously press the down key)', () => {
-            searchBar.setProps({ suggestions: [{ t: 'title 1' }, { t: 'title 2' }] });
+            searchBar.setProps({ suggestions: [{ title: 'title 1' }, { title: 'title 2' }] });
 
             searchBarInput.simulate('keydown', { keyCode: 40 });
             searchBarInput.simulate('keydown', { keyCode: 40 });
@@ -89,7 +89,7 @@ describe('SearchBar', () => {
         });
 
         it('should set the highlight back to the previous index element', () => {
-            searchBar.setProps({ suggestions: [{ t: 'title 1' }, { t: 'title 2' }] });
+            searchBar.setProps({ suggestions: [{ title: 'title 1' }, { title: 'title 2' }] });
 
             searchBarInput.simulate('keydown', { keyCode: 40 });
             searchBarInput.simulate('keydown', { keyCode: 40 });
@@ -108,7 +108,7 @@ describe('SearchBar', () => {
         }
 
         beforeEach(() => {
-            searchBar.setState({ isFocused: true, inputValue: true });
+            searchBar.setState({ isFocused: true, inputValue: SEARCH_TERM });
         })
     });
 

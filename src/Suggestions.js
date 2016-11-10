@@ -1,4 +1,6 @@
+import ReactDOM from 'react-dom';
 import classNames from 'classnames';
+import TitleRender from './TitleRenderer';
 import React, { Component } from 'react';
 
 class Suggestions extends Component {
@@ -6,13 +8,13 @@ class Suggestions extends Component {
         super(props);
 
         this.state = {
-            activeItem: -1
+            mouseOverDisabled: true
         };
     }
 
     onTouchStart(index) {
         this.timer = setTimeout(() => {
-            this.setState({ activeItem: index });
+            this.setState({ rolledOver: index });
         }, 200);
     }
 
@@ -21,7 +23,7 @@ class Suggestions extends Component {
 
         this.touchedMoved = true;
 
-        this.setState({ activeItem: -1 });
+        this.setState({ highlightedItemIndex: -1 });
     }
 
     onTouchEnd(suggestion) {
@@ -33,60 +35,40 @@ class Suggestions extends Component {
         }
         this.touchedMoved = false;
     }
-    componentDidUpdate(){
 
+    componentDidUpdate() {
 
+        //this.refs.list.focus();
+
+        if (this.state.mouseOverDisabled) {
+            const list = ReactDOM.findDOMNode(this.refs.list);
+
+            const activeItem = list.querySelector('.highlighted');
+
+            if (activeItem) {
+                activeItem.scrollIntoViewIfNeeded(false);
+            }
+        } else {
+            console.log('not scrolling into view');
+
+        }
     }
-    formatTitle(searchTerm, suggestion) {
 
-        let title = suggestion.title;
-
-        let result = title;
-
-        let modifiedCaseSearchTerm = upperCaseFirstLetter(searchTerm);
-
-        let positionOfModifiedCaseSearchTerm = title.search(modifiedCaseSearchTerm);
-
-        if (positionOfModifiedCaseSearchTerm === -1) {
-            modifiedCaseSearchTerm = searchTerm.toLowerCase();
-            positionOfModifiedCaseSearchTerm = title.search(modifiedCaseSearchTerm);
-        }
-
-        if (positionOfModifiedCaseSearchTerm === -1) {
-            modifiedCaseSearchTerm = searchTerm;
-            positionOfModifiedCaseSearchTerm = title.search(modifiedCaseSearchTerm);
-        }
-
-        if (positionOfModifiedCaseSearchTerm !== -1) {
-            result = [
-                title.substr(0, positionOfModifiedCaseSearchTerm),
-                <span className="strong" key={searchTerm}>{modifiedCaseSearchTerm}</span>,
-                title.substr(positionOfModifiedCaseSearchTerm + searchTerm.length, title.length)
-            ]
-        }
-
-        function upperCaseFirstLetter(text) {
-            return text
-                .toLowerCase()
-                .split(' ')
-                .map((word)=> {
-                    return word[0].toUpperCase() + word.substr(1);
-                })
-                .join(' ');
-        }
-
-        return result;
+    componentWillReceiveProps(nextProps) {
+        const mouseOverDisabled = nextProps.highlightedItemIndex !== this.props.highlightedItemIndex;
+        this.setState({ mouseOverDisabled });
     }
 
     render() {
-        const { highlightedItemIndex, onSelection, suggestions, searchTerm } = this.props;
-
-        const { activeItem } = this.state;
+        const { onSelection, suggestions, searchTerm } = this.props;
 
         return (
-            <ul className="search-bar-suggestions"
-                ref="list"
-                onMouseLeave={() => this.setState({ activeItem: -1 })}>
+            <ul ref="list"
+                /*tabIndex="0"
+                onKeyDown={(e)=>{console.log('key',e.keycode)
+                }}*/
+                className="search-bar-suggestions"
+                onMouseLeave={() => this.setState({ rolledOver: -1 })}>
 
                 {suggestions.map((suggestion, index) =>
 
@@ -96,11 +78,23 @@ class Suggestions extends Component {
                         onTouchStart={() => this.onTouchStart(index)}
                         onTouchEnd={() => this.onTouchEnd(suggestion)}
                         onClick={() => onSelection(suggestion)}
-                        onMouseEnter={() => this.setState({ activeItem: index })}
+                        onMouseEnter={() => {
+                            if (!this.state.mouseOverDisabled) {
+                                console.log('rolly poo!');
+                                this.props.onItemRollover(index)
+                            }
+                        }}
+                        onMouseMove={ ()=> {
+                            if (this.state.mouseOverDisabled) {
+                                this.setState({ mouseOverDisabled: false });
+                            }
+                        }}
                         className={classNames({
-                            highlighted: highlightedItemIndex === index || activeItem === index
+                            highlighted: this.props.highlightedItemIndex === index,
                         })}>
-                        { this.formatTitle(searchTerm, suggestion) }
+
+                        <TitleRender title={suggestion.title}
+                                     highlightedCharacters={searchTerm}/>
                     </li>
                 )}
             </ul>
@@ -110,6 +104,7 @@ class Suggestions extends Component {
 
 Suggestions.propTypes = {
     onSelection: React.PropTypes.func,
+    onItemRollover: React.PropTypes.func,
     highlightedItemIndex: React.PropTypes.number,
     suggestions: React.PropTypes.array.isRequired,
 };

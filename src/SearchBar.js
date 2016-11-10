@@ -1,7 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
 import Suggestions from './Suggestions'; //eslint-disable-line no-unused-vars
-
 const keyCodes = { UP: 38, DOWN: 40, ENTER: 13, ESCAPE: 27 };
 
 class SearchBar extends React.Component {
@@ -113,6 +112,18 @@ class SearchBar extends React.Component {
         this.search();
     }
 
+    shouldRenderSuggestion() {
+        return  this.state.inputValue && this.props.suggestions.length > 0;
+    }
+
+    shouldRenderNoSuggestion() {
+        return this.state.isFocused && this.state.inputValue && this.props.suggestions.length === 0 && this.props.enableNoSuggestionsPanel
+    }
+
+    updateHighlightedItemIndex(highlightedItemIndex) {
+        this.setState({ highlightedItemIndex });
+    }
+
     render() {
 
         return (
@@ -135,11 +146,9 @@ class SearchBar extends React.Component {
                            value={this.state.inputValue}
                            placeholder={this.props.placeholder}
                            onFocus={() => this.setState({ isFocused: true })}
-                           onBlur={() => {
-                               this.setState({ isFocused: false });
-                               console.log('Blurr');
-                           }}
-                           onKeyDown={this.props.suggestions && this.onKeyDown}/>
+                           onBlur={() => this.setState({ isFocused: false })}
+                           onKeyDown={this.props.suggestions && this.onKeyDown}
+                    />
 
                     { this.state.inputValue &&
 
@@ -152,13 +161,22 @@ class SearchBar extends React.Component {
                            className="icon search-bar-submit"/>
                 </div>
 
-                {   this.state.inputValue && this.props.suggestions.length > 0 &&
+                { this.shouldRenderSuggestion() &&
 
                 <Suggestions onSelection={this.onSelection}
                              searchTerm={this.state.inputValue}
                              suggestions={this.props.suggestions}
-                             highlightedItemIndex={this.state.highlightedItemIndex}/>
+                             highlightedItemIndex={this.state.highlightedItemIndex}
+                             onItemRollover={(index)=> {
+                                 this.updateHighlightedItemIndex(index);
+                             }}/>
                 }
+
+                { this.shouldRenderNoSuggestion() &&
+
+                <div className="search-bar-no-results">No search results found</div>
+                }
+
             </div>
         );
     }
@@ -170,12 +188,14 @@ SearchBar.defaultProps = {
 };
 
 SearchBar.propTypes = {
+
     delay: React.PropTypes.number,
     onSearch: React.PropTypes.func,
     autoFocus: React.PropTypes.bool,
     inputName: React.PropTypes.string,
     placeholder: React.PropTypes.string,
     onChange: React.PropTypes.func.isRequired,
+    enableNoSuggestionsPanel: React.PropTypes.bool,
 };
 
 export default SearchBar;
