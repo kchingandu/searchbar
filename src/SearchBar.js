@@ -1,9 +1,10 @@
-import React from 'react';
 import classNames from 'classnames';
-import Suggestions from './Suggestions'; //eslint-disable-line no-unused-vars
+import React, { Component }from 'react';
+import SuggestionsPanel from './SuggestionsPanel'; //eslint-disable-line no-unused-vars
+
 const keyCodes = { UP: 38, DOWN: 40, ENTER: 13, ESCAPE: 27 };
 
-class SearchBar extends React.Component {
+class SearchBar extends Component {
     constructor(props) {
         super(props);
 
@@ -24,9 +25,7 @@ class SearchBar extends React.Component {
     }
 
     componentDidMount() {
-        if (this.props.autoFocus) {
-            this.refs.input.focus();
-        }
+        this.props.autoFocus && this.refs.input.focus();
     }
 
     onKeyDown(e) {
@@ -37,7 +36,9 @@ class SearchBar extends React.Component {
             this.scroll(key);
         }
         else if (key === keyCodes.ENTER) {
+            e.preventDefault();
             this.search();
+            this.refs.input.blur();
         }
         else if (key === keyCodes.ESCAPE) {
             this.refs.input.blur();
@@ -72,9 +73,7 @@ class SearchBar extends React.Component {
 
             this.setState({ highlightedItemIndex });
 
-            if (this.props.onSearch) {
-                this.props.onSearch(value);
-            }
+            this.props.onSearch && this.props.onSearch(value);
         }
     }
 
@@ -83,9 +82,7 @@ class SearchBar extends React.Component {
 
         const input = e.target.value;
 
-        if (!input) {
-            this.setState(this.initialState);
-        }
+        !input && this.setState(this.initialState);
 
         this.setState({ inputValue: input });
 
@@ -96,6 +93,7 @@ class SearchBar extends React.Component {
         const searchTerm = this.normalizeInputValue();
 
         this.props.onChange(searchTerm);
+
         this.setState({ highlightedItemIndex: -1 });
     }
 
@@ -103,8 +101,8 @@ class SearchBar extends React.Component {
         return this.state.inputValue.toLowerCase().trim();
     }
 
-    onSelection(suggestion) {
-        this.setState({ inputValue: suggestion.title }, () => this.search());
+    onSelection({ title }) {
+        this.setState({ inputValue: title }, () => this.search());
     }
 
     onSearch(e) {
@@ -113,7 +111,7 @@ class SearchBar extends React.Component {
     }
 
     shouldRenderSuggestion() {
-        return  this.state.inputValue && this.props.suggestions.length > 0;
+        return this.state.isFocused && this.state.inputValue && this.props.suggestions.length > 0;
     }
 
     shouldRenderNoSuggestion() {
@@ -128,55 +126,49 @@ class SearchBar extends React.Component {
 
         return (
             <div className="search-bar-wrapper">
+                <div className="glass">
+                    <div className={classNames(
+                        'search-bar-field',
+                        { 'is-focused': this.state.isFocused },
+                        { 'has-suggestions': this.props.suggestions.length > 0 })}>
 
-                <div className={classNames(
-                    'search-bar-field',
-                    { 'is-focused': this.state.isFocused },
-                    { 'has-suggestions': this.props.suggestions.length > 0 })}>
+                        <span className="icon search-bar-icon"/>
 
-                    <input ref="input"
-                           type="text"
-                           maxLength="100"
-                           autoCorrect="off"
-                           autoComplete="off"
-                           autoCapitalize="none"
-                           onChange={this.onChange}
-                           name={this.props.inputName}
-                           className="search-bar-input"
-                           value={this.state.inputValue}
-                           placeholder={this.props.placeholder}
-                           onFocus={() => this.setState({ isFocused: true })}
-                           onBlur={() => this.setState({ isFocused: false })}
-                           onKeyDown={this.props.suggestions && this.onKeyDown}
-                    />
+                        <input ref="input"
+                               type="text"
+                               maxLength="100"
+                               autoCorrect="off"
+                               autoComplete="off"
+                               autoCapitalize="none"
+                               onChange={this.onChange}
+                               name={this.props.inputName}
+                               className="search-bar-input"
+                               value={this.state.inputValue}
+                               placeholder={this.props.placeholder}
+                               onFocus={() => this.setState({ isFocused: true })}
+                               onBlur={() => this.setState({ isFocused: false })}
+                               onKeyDown={this.props.suggestions && this.onKeyDown}
+                        />
 
-                    { this.state.inputValue &&
+                        { this.state.inputValue && <span className="icon search-bar-clear"
+                                                         onClick={() => this.setState(this.initialState)}/>
+                        }
 
-                    <span className="icon search-bar-clear"
-                          onClick={() => this.setState(this.initialState)}/>
+                    </div>
+
+                    { this.shouldRenderSuggestion() &&
+
+                    <SuggestionsPanel onSelection={this.onSelection}
+                                      searchTerm={this.state.inputValue}
+                                      suggestions={this.props.suggestions}
+                                      highlightedItemIndex={this.state.highlightedItemIndex}
+                                      onItemRollover={(index)=> {
+                                          this.updateHighlightedItemIndex(index);
+                                      }}/>
                     }
 
-                    <input type="submit"
-                           onClick={this.onSearch}
-                           className="icon search-bar-submit"/>
+                    { this.shouldRenderNoSuggestion() && <div className="search-bar-no-results">No search results found</div> }
                 </div>
-
-                { this.shouldRenderSuggestion() &&
-
-                <Suggestions onSelection={this.onSelection}
-                             searchTerm={this.state.inputValue}
-                             suggestions={this.props.suggestions}
-                             highlightedItemIndex={this.state.highlightedItemIndex}
-                             onItemRollover={(index)=> {
-                                 this.updateHighlightedItemIndex(index);
-                             }}/>
-                }
-
-                { this.shouldRenderNoSuggestion() &&
-
-                <div className="search-bar-no-results">No search results found</div>
-                }
-
             </div>
         );
     }
@@ -188,7 +180,6 @@ SearchBar.defaultProps = {
 };
 
 SearchBar.propTypes = {
-
     delay: React.PropTypes.number,
     onSearch: React.PropTypes.func,
     autoFocus: React.PropTypes.bool,

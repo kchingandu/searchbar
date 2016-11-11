@@ -15,6 +15,7 @@ export default function (searchString, targetString) {
             break;
         }
     }
+
     return searchData;
 }
 
@@ -28,7 +29,7 @@ function upperCaseTheFirstLetterOfEachWord(string = '') {
 }
 
 function uppercase(str) {
-    return str[0].toUpperCase() + str.substr(1);
+    return str[0] && str[0].toUpperCase() + str.substr(1) || '';
 }
 
 function searchForEachWordOfSearchStringInLowerCase(data) {

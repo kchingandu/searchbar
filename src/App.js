@@ -1,31 +1,43 @@
 import './App.css';
-import React from 'react';
 import SearchBar from './SearchBar'
 import searchBot from './searchBot';
 import { connect } from 'react-redux'
+import React, { Component }from 'react';
 
-const App = (props)=> {
+class App extends Component {
+    constructor(props) {
+        super(props);
+        this.state = { showSearchBar: true };
+        this.getData = this.getData.bind(this)
+    }
 
-    function getData(term) {
-
+    getData(term) {
         searchBot.getSuggestions(term).then((result) => {
-            props.onChange(result);
-            //console.log(result);
+            this.props.onChange(result);
         })
     }
 
-    return (
-        <div className="App">
-            <SearchBar onChange={getData}
-                       suggestions={props.suggestionsData.suggestions}
-                       enableNoSuggestionsPanel={props.suggestionsData.isApiResponse}
-                       placeholder="Search for TV shows, movies, actors or events..."/>
-        </div>
-    );
-};
+    render() {
+        return (
+            <div className="search">
+
+                <button className="icon search-toggle-button"
+                        onClick={()=>this.setState({ showSearchBar: true }) }/>
+
+                { this.state.showSearchBar && <SearchBar onChange={this.getData}
+                                                         suggestions={this.props.suggestionsData.suggestions}
+                                                         placeholder="Search for TV shows, movies, actors or events..."
+                                                         enableNoSuggestionsPanel={this.props.suggestionsData.isApiResponse}/>
+                }
+
+                <div className="search-overlay" onClick={() =>this.setState({ showSearchBar: false })}></div>
+            </div>
+        );
+    }
+}
 
 const mapStateToProps = state => {
-    return { suggestionsData: state.suggestionsData};
+    return { suggestionsData: state.suggestionsData };
 };
 
 const mapDisptachToProps = (dispatch) => {

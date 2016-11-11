@@ -102,9 +102,6 @@ describe('SearchBar', () => {
 
             assert.equal(searchBar.state('inputValue'), 'title 1');
             assert.equal(searchBar.state('highlightedItemIndex'), 0);
-
-            assert.isTrue(searchBar.find('.search-bar-suggestions').childAt(0).hasClass('highlighted'));
-            assert.isFalse(searchBar.find('.search-bar-suggestions').childAt(1).hasClass('highlighted'));
         }
 
         beforeEach(() => {
