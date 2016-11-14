@@ -2,11 +2,17 @@ import './index.css';
 import App from './App';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createStore } from 'redux'
 import { Provider } from 'react-redux'
+import createSagaMiddleware from 'redux-saga'
+import { createStore, applyMiddleware } from 'redux'
 import suggestionsReducer from './suggestionsReducer';
+import retrieveSearchSuggestion from './retrieveSearchSuggestionSaga';
 
-let store = createStore(suggestionsReducer);
+const sagaMiddleware = createSagaMiddleware();
+
+let store = createStore(suggestionsReducer, applyMiddleware(sagaMiddleware));
+
+sagaMiddleware.run(retrieveSearchSuggestion);
 
 ReactDOM.render(
     <Provider store={store}>

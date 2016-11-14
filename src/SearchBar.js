@@ -25,7 +25,9 @@ class SearchBar extends Component {
     }
 
     componentDidMount() {
-        this.props.autoFocus && this.refs.input.focus();
+        if (this.props.autoFocus) {
+            this.refs.input.focus();
+        }
     }
 
     onKeyDown(e) {
@@ -73,7 +75,7 @@ class SearchBar extends Component {
 
             this.setState({ highlightedItemIndex });
 
-            this.props.onSearch && this.props.onSearch(value);
+            if (this.props.onSearch)  this.props.onSearch(value);
         }
     }
 
@@ -82,7 +84,7 @@ class SearchBar extends Component {
 
         const input = e.target.value;
 
-        !input && this.setState(this.initialState);
+        if (input) this.setState(this.initialState);
 
         this.setState({ inputValue: input });
 
@@ -111,7 +113,7 @@ class SearchBar extends Component {
     }
 
     shouldRenderSuggestion() {
-        return this.state.isFocused && this.state.inputValue && this.props.suggestions.length > 0;
+        return this.state.inputValue && this.props.suggestions.length > 0;
     }
 
     shouldRenderNoSuggestion() {
@@ -167,7 +169,8 @@ class SearchBar extends Component {
                                       }}/>
                     }
 
-                    { this.shouldRenderNoSuggestion() && <div className="search-bar-no-results">No search results found</div> }
+                    { this.shouldRenderNoSuggestion() &&
+                    <div className="search-bar-no-results">No search results found</div> }
                 </div>
             </div>
         );

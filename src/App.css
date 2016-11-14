@@ -42,13 +42,13 @@ input {
 }
 
 .search-bar-field {
-    width: 450px;
     position: relative;
 }
 
 .search-bar-input {
     margin: 0;
     width: 100%;
+    width: 450px;
     border-radius: 2px;
     box-sizing: border-box;
     border: 1px solid #ddd;
@@ -108,6 +108,7 @@ input {
     padding: 0;
     color: white;
     height: 294px;
+    width: 450px;
     font-size: 100%;
     list-style: none;
     background: black;

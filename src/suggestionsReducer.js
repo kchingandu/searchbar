@@ -1,9 +1,9 @@
-const suggestions = (state = createInitialSuggestionData(), action) => {
+const suggestions = (state = createInitialSuggestionData(), { type, suggestions }) => {
 
-    switch (action.type) {
+    switch (type) {
 
-        case 'GET_SUGGESTIONS':
-            return Object.assign({}, state, { suggestionsData: { suggestions: action.payload, isApiResponse: true } });
+        case 'SAVE_SUGGESTIONS':
+            return Object.assign({}, state, { suggestionsData: { suggestions, isApiResponse: true } });
 
         default:
             return state
